@@ -9,13 +9,13 @@
 
 ### NSDateFormatter
 
-`NSDateFormatter` is not the only class that is expensive to setup, but it is expensive and utilized enough that Apple specifically recommends caching and reusing instances where possible.
+`NSDateFormatter` 不是唯一一个创建的开销就很昂贵的类，但是它却是常用的、开销大到 Apple 会特别建议应该缓存和重复使用实例的一个。
 
-> Creating a date formatter is not a cheap operation. If you are likely to use a formatter frequently, it is typically more efficient to cache a single instance than to create and dispose of multiple instances. One approach is to use a static variable.
+> 创建一个 Date Formatter 不是一个廉价操作。如果你可能会频繁使用一个 formatter，那么创建缓存一个单例比重复创建销毁多个实例要高效很多。一种办法就是使用静态变量。
 
 [Source](https://developer.apple.com/library/ios/documentation/cocoa/Conceptual/DataFormatting/Articles/dfDateFormatting10_4.html)
 
-A common method of caching `NSDateFormatter`s is to use `-[NSThread threadDictionary]` (because `NSDateFormatter` is not thread-safe):
+一种通用的缓存 `NSDateFormatter` 的方法是使用 `-[NSThread threadDictionary]`（因为 `NSDateFormatter` 不是线程安全的）：
 
 ```objective-c
 + (NSDateFormatter *)cachedDateFormatter {
@@ -33,7 +33,7 @@ A common method of caching `NSDateFormatter`s is to use `-[NSThread threadDictio
 
 #####- (NSDate *)dateFromString:(NSString *)string
 
-This is potentially the most common iOS performance bottleneck. As a result, much effort has been dedicated to discovering alternatives. Below are the best known `NSDateFormatter` substitutions for [ISO8601](http://en.wikipedia.org/wiki/ISO_8601) to `NSDate` conversion.
+这可能是最常见的 iOS 性能瓶颈。经过多方努力寻找，下面是 [ISO8601](http://en.wikipedia.org/wiki/ISO_8601) 转成 `NSDate` 的 `NSDateFormatter` 的最著名替代品。
 
 ######strptime 
 
@@ -74,7 +74,7 @@ sqlite3_reset(statement);
 
 #####- (NSDictionary *)attributesOfItemAtPath:(NSString *)filePath error:(NSError *)error
 
-When attempting to retrieve an attribute of a file on disk, using `–[NSFileManager attributesOfItemAtPath:error:]` will expend an excessive amount of time fetching additional attributes of the file that you may not need. Instead of using `NSFileManager`, you can directly query the file properties using `stat`:
+当试图获取磁盘中一个文件的属性信息时，使用 `–[NSFileManager attributesOfItemAtPath:error:]` 会浪费大量时间读取你可能根本不需要的附加属性。这时你可以使用 `stat` 代替 `NSFileManager`，直接获取文件属性：
 
 ```objective-c
 //#import <sys/stat.h>
@@ -93,13 +93,13 @@ if (cpath && stat(cpath, &statbuf) == 0) {
 
 #####NSLog(NSString *format, ...)
 
-`NSLog()` writes messages to the Apple System Log facility. Written messages are presented in the debugger console when built and run via Xcode, in addition to the device's console log even in production. Additionally, `NSLog()` statements are serialized by the system and performed on the main thread. Even on fairly new iOS hardware, `NSLog()` takes a non-negligible amount of time while only providing debug value. As a result, it is recommended to use `NSLog()` as sparingly as possible in production.
+`NSLog()` 写消息到 Apple 的系统日志。当通过 Xcode 变异运行程序时，被写出的日志会展现在调试终端，同事也会写到设备产品终端日志中。此外，系统会在主线程序列化 `NSLog()` 的内容。即使是最新的 iOS 设备，`NSLog()` 输出调试信息所花的时间也是无法忽略的。所以在产品环境中推荐尽可能少的使用 `NSLog()`。
 
-> Calling `NSLog` makes a new calendar for each line logged. Avoid calling `NSLog` excessively.
+> 调用 `NSLog` 会为每一行日志生成一个事件，应避免过度使用 `NSLog`。
 
 [Source](https://developer.apple.com/videos/wwdc/2012/?id=235)
 
-The following are commonly used log definitions that are used to selectively perform `NSLog()` in debug/production:
+下面是通常会用到的宏定义，它会根据 debug/production 来选择执行 `NSLog()`：
 
 ```objective-c
 #ifdef DEBUG
@@ -118,7 +118,7 @@ The following are commonly used log definitions that are used to selectively per
 
 #####+ (instancetype)stringWithFormat:(NSString *)format,, ...
 
-`NSString` creation is not particularly expensive, but when used in a tight loop (as dictionary keys, for example), `+[NSString stringWithFormat:]` performance can be improved dramatically by being replaced with `asprintf` or similar functions in C.
+创建 `NSString` 不是特别昂贵，但是当在紧凑循环（比如作为字典的键值）中使用时， `+[NSString stringWithFormat:]` 的性能可以通过使用类似 `asprintf` 的 C 函数显著提高。
 
 ```objective-c
 NSString *firstName = @"Daniel";
@@ -131,4 +131,4 @@ free(buffer);
 
 #####- (instancetype)initWithFormat:(NSString *)format, ...
 
-See [`+[NSString stringWithFormat:]`](#-instancetypestringwithformatnsstring-format-)
+参考 [`+[NSString stringWithFormat:]`](#-instancetypestringwithformatnsstring-format-)
