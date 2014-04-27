@@ -11,7 +11,7 @@
 
 `NSDateFormatter` 不是唯一一个创建的开销就很昂贵的类，但是它却是常用的、开销大到 Apple 会特别建议应该缓存和重复使用实例的一个。
 
-> 创建一个 Date Formatter 不是一个廉价操作。如果你可能会频繁使用一个 formatter，那么创建缓存一个单例比重复创建销毁多个实例要高效很多。一种办法就是使用静态变量。
+> Creating a date formatter is not a cheap operation. If you are likely to use a formatter frequently, it is typically more efficient to cache a single instance than to create and dispose of multiple instances. One approach is to use a static variable.
 
 [Source](https://developer.apple.com/library/ios/documentation/cocoa/Conceptual/DataFormatting/Articles/dfDateFormatting10_4.html)
 
@@ -95,7 +95,7 @@ if (cpath && stat(cpath, &statbuf) == 0) {
 
 `NSLog()` 写消息到 Apple 的系统日志。当通过 Xcode 变异运行程序时，被写出的日志会展现在调试终端，同事也会写到设备产品终端日志中。此外，系统会在主线程序列化 `NSLog()` 的内容。即使是最新的 iOS 设备，`NSLog()` 输出调试信息所花的时间也是无法忽略的。所以在产品环境中推荐尽可能少的使用 `NSLog()`。
 
-> 调用 `NSLog` 会为每一行日志生成一个事件，应避免过度使用 `NSLog`。
+> Calling `NSLog` makes a new calendar for each line logged. Avoid calling `NSLog` excessively.
 
 [Source](https://developer.apple.com/videos/wwdc/2012/?id=235)
 
